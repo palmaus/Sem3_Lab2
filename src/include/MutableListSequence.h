@@ -67,6 +67,12 @@ public:
         }
     }
 
+    void set(int index, const T& item)
+    {
+        removeAt(index);
+        insertAt(index, item);
+    }
+
     Option<T> tryGetFirst() const override {
         if (getLength() == 0)
             return Option<T>();

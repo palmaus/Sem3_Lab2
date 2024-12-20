@@ -178,7 +178,6 @@ public:
     }
 
     void insertAt(int index, const T &value) {
-        checkIndex(index);
         if (index == 0) {
             prepend(value);
             return;

@@ -45,49 +45,35 @@ public:
     bool isFinished() override { return finished; }
 
       bool step() override {
-         qDebug() << "ShellSort::step() called. i = " << i << ", j = " << j << ", gapIndex = " << gapIndex;
         if (finished) return false;
-
-         if (gapIndex < gaps.size()) {
+        if (gapIndex < gaps.size()) {
             if (i < n) {
-              if(j < n)
-              {
-                   ++m_cmpCounter;
-                   if (j >= gaps[gapIndex] && (*comparator)(sequence->get(j - gaps[gapIndex]), sequence->get(j)))
-                    {
-                        qDebug() << "Before swap, j = " << j;
-                         std::swap(sequence->get(j), sequence->get(j - gaps[gapIndex]));
-                           qDebug() << "Swapped elements at " << j << " and " << j- gaps[gapIndex];
-                        int tempJ = j;
-                       j -= gaps[gapIndex];
-                       while(j >= gaps[gapIndex] && (*comparator)(sequence->get(j - gaps[gapIndex]), sequence->get(j))) {
-                         ++m_cmpCounter;
-                         std::swap(sequence->get(j), sequence->get(j - gaps[gapIndex]));
-                          qDebug() << "Swapped elements at " << j << " and " << j- gaps[gapIndex] << " in inner loop";
+                  if(j < n)
+                  {
+                       ++m_cmpCounter;
+                       if (j >= gaps[gapIndex] && (*comparator)(sequence->get(j),sequence->get(j - gaps[gapIndex]))) {
+                           std::swap(sequence->get(j), sequence->get(j - gaps[gapIndex]));
+                           int tempJ = j;
                            j -= gaps[gapIndex];
-                       }
+                           while(j >= gaps[gapIndex] && (*comparator)(sequence->get(j - gaps[gapIndex]), sequence->get(j))) {
+                                ++m_cmpCounter;
+                                std::swap(sequence->get(j), sequence->get(j - gaps[gapIndex]));
+                                j -= gaps[gapIndex];
+                           }
                            return true;
-
-                    } else
-                      {
-                           j++;
-                       }
-               } else{
-                     i++;
-                    j = i;
-                }
+                        } else { j++; }
+                  } else  {
+                      i++;
+                      j = i;
+                  }
             }
             else {
                 gapIndex++;
-                qDebug() << "gapIndex incremented to: " << gapIndex;
-
                 i = 0;
                 j = 0;
             }
-        }
-        else {
+        } else {
              finished = true;
-            qDebug() << "ShellSort finished";
         }
         return false;
     }

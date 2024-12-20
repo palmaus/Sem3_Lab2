@@ -1,7 +1,6 @@
 #include "Window.h"
 #include "Comparators.h"
 #include <QFileDialog>
-#incude <QMessageBox>
 #include <fstream>
 #include <QScrollArea>
 
@@ -16,6 +15,7 @@ Window::Window(QWidget *parent, QGraphicsScene *scene, QGraphicsView *view, cons
     m_chooseAlgo->addItem("Bubblesort");
     m_chooseAlgo->addItem("Heapsort");
     m_chooseAlgo->addItem("Shellsort");
+    m_chooseAlgo->addItem("Mergesort");
 
     m_chooseAlgo->setCurrentIndex(1);
     m_chooseAlgo->setCurrentIndex(0);
@@ -169,6 +169,8 @@ void Window::startSorting() {
         sorter = new HeapSort<Student, StudentComparator>();
     } else if (m_chooseAlgo->currentIndex() == 2) {
         sorter = new ShellSort<Student, StudentComparator>();
+    } else if (m_chooseAlgo->currentIndex() == 3) {
+        sorter = new MergeSort<Student, StudentComparator>();
     }
 
     bool ok;

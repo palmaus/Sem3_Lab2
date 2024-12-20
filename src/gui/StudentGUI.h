@@ -25,9 +25,6 @@
 #include "Comparators.h"
 #include "File.h"
 
-
-
-
 class StudentGUI : public QWidget {
 
 private:
@@ -85,6 +82,9 @@ public:
 
         sorterComboBox = new QComboBox();
         sorterComboBox->addItem("Bubble Sort");
+        sorterComboBox->addItem("Shell Sort");
+        sorterComboBox->addItem("Merge Sort");
+        sorterComboBox->addItem("Heap Sort");
 
         comparatorComboBox = new QComboBox();
         comparatorComboBox->addItem("By ID");
@@ -189,6 +189,9 @@ private slots:
 
         switch (sorterIndex) {
             case 0: sorter = new BubbleSort<Student, StudentComparator>(); break;
+            case 1: sorter = new ShellSort<Student, StudentComparator>(); break;
+            case 2: sorter = new MergeSort<Student, StudentComparator>(); break;
+            case 3: sorter = new HeapSort<Student, StudentComparator>(); break;
         }
 
 

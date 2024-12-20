@@ -30,6 +30,7 @@
 #include "BubbleSort.h"
 #include "HeapSort.h"
 #include "ShellSort.h"
+#include "MergeSort.h"
 #include "VisualizationWidget.h"
 #include "Comparators.h"
 #include "StudentGUI.h"
