@@ -18,10 +18,23 @@ private:
     const Comparator* comparator;
     void initGaps() {
         gaps.clear();
-        for (int k = n / 2; k > 0; k /= 2)
-        {
-            gaps.push_back(k);
+        int k = 0;
+        int gap;
+        while (true) {
+            if (k % 2 == 0)
+            {
+                gap = 9 * pow(4, k / 2) - 9 * pow(2, k / 2) + 1;
+            } else {
+                gap = 8 * pow(4, (k - 1) / 2) - 6 * pow(2, (k+1) / 2) + 1;
+            }
+            if(gap < 1)
+                break;
+
+            gaps.insert(gaps.begin(), gap);
+            k++;
+
         }
+
         gapIndex = 0;
         i = 0;
         j = 0;

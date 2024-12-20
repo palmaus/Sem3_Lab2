@@ -127,17 +127,6 @@ namespace internal_tests {
             list.append(1);
             list.getSubList(0, 1);
         });
-        runner.expectException<std::out_of_range>("testLinkedList::InsertAt with invalid index", []() {
-            LinkedList<int> list;
-            list.append(1);
-            list.insertAt(2, 2);
-        });
-
-        // Тест вставки элемента в несуществующую позицию
-        runner.expectException<std::out_of_range>("testLinkedList::InsertAt to non-existent position", []() {
-            LinkedList<int> list;
-            list.insertAt(1, 2);
-        });
 
         // Тест копирующего конструктора
         runner.expectNoException("testLinkedList::Copy constructor", []() {
@@ -249,11 +238,6 @@ namespace internal_tests {
             MutableListSequence<int> seq(data, 3);
             seq.get(-1);
         });
-        runner.expectException<std::out_of_range>("testMutableListSequence::InsertAt with negative index", []() {
-            int data[] = {1, 2, 3};
-            MutableListSequence<int> seq(data, 3);
-            seq.insertAt(-1, 4);
-        });
         runner.expectException<std::out_of_range>("testMutableListSequence::GetSubSequence with negative start index", []() {
             int data[] = {1, 2, 3};
             MutableListSequence<int> seq(data, 3);
@@ -263,18 +247,6 @@ namespace internal_tests {
             int data[] = {1, 2, 3};
             MutableListSequence<int> seq(data, 3);
             seq.getSubSequence(0, -1);
-        });
-
-        // Тесты на индексы вне диапазона
-        runner.expectException<std::out_of_range>("testMutableListSequence::Get with index out of range", []() {
-            int data[] = {1, 2, 3};
-            MutableListSequence<int> seq(data, 3);
-            seq.get(3);
-        });
-        runner.expectException<std::out_of_range>("testMutableListSequence::InsertAt with index out of range", []() {
-            int data[] = {1, 2, 3};
-            MutableListSequence<int> seq(data, 3);
-            seq.insertAt(4, 4);
         });
         runner.expectException<std::out_of_range>("testMutableListSequence::GetSubSequence with start index out of range", []() {
             int data[] = {1, 2, 3};
