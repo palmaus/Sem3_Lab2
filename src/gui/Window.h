@@ -36,7 +36,7 @@
 #include <QTabWidget>
 
 
-class Window : public QWidget { // Теперь наследуемся от QWidget
+class Window : public QWidget {
     Q_OBJECT
 
     public:
@@ -93,7 +93,7 @@ class Window : public QWidget { // Теперь наследуемся от QWid
         QVBoxLayout *m_chooseMenu;
         QIntValidator* validator;
 
-        QComboBox* m_chooseComparator;  // ComboBox для выбора компаратора
+        QComboBox* m_chooseComparator;
         std::vector<StudentComparator*> comparators; // Вектор для хранения компараторов
 
 
@@ -102,8 +102,8 @@ class Window : public QWidget { // Теперь наследуемся от QWid
          QWidget *m_fileTab;
 
 
-        VisualizationWidget *visualizationWidget; // Student вместо T
-        SortController *sortController; // Student вместо T, StudentComparator
+        VisualizationWidget *visualizationWidget;
+        SortController *sortController;
         int delay;
 
 

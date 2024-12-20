@@ -1,14 +1,14 @@
 #include "Window.h"
 #include "Comparators.h"
 #include <QFileDialog>
-#include <QMessageBox>
+#incude <QMessageBox>
 #include <fstream>
 #include <QScrollArea>
 
 Window::Window(QWidget *parent, QGraphicsScene *scene, QGraphicsView *view, const SharedPtr<MutableListSequence<Student>>& seq, int delay)
     : QWidget(parent), sequence(seq),  delay(delay), m_parent(parent), m_scene(scene), m_view(view)
 {
-    // setFixedSize(200, 600);  //Убираем фиксированный размер окна
+
     move(550, 10);
 
 
@@ -62,79 +62,75 @@ Window::Window(QWidget *parent, QGraphicsScene *scene, QGraphicsView *view, cons
     comparators.push_back(new CompareStudentsByFirstName());
 
     currentComparator = comparators[0];
+    m_tabWidget = new QTabWidget(this);
+    m_tabWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    m_visualisationTab = new QWidget();
+    m_fileTab = new QWidget();
+    m_fileTab->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+    m_fileTab->setMinimumWidth(400);
+
+    QVBoxLayout *mainLayout = new QVBoxLayout(this);
+
+    QVBoxLayout* visualisationLayout = new QVBoxLayout(m_visualisationTab);
+
+    m_chooseMenu = new QVBoxLayout();
+    m_chooseMenu->addWidget(new QLabel("Algorithm:", this));
+    m_chooseMenu->addWidget(m_chooseAlgo);
+    m_chooseMenu->addWidget(new QLabel("Delay:", this));
+    m_chooseMenu->addWidget(m_chooseDelay);
+    m_chooseMenu->addWidget(new QLabel("Size:", this));
+    m_chooseMenu->addWidget(m_chooseSize);
+    m_chooseMenu->addWidget(new QLabel("Scramble:", this));
+    m_chooseMenu->addWidget(m_chooseScramble);
+    m_chooseMenu->addWidget(new QLabel("Compare By:", this));
+    m_chooseMenu->addWidget(m_chooseComparator);
+    m_chooseMenu->addWidget(new QLabel("Comparisons", this));
+    m_chooseMenu->addWidget(m_nbCmp);
+
+    auto buttons = new QGridLayout();
+    buttons->addWidget(m_start, 1, 1);
+    buttons->addWidget(m_exit, 2, 1);
+    buttons->addWidget(m_reset, 1, 2);
+
+    QSpacerItem *hSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+    buttons->addItem(hSpacer,1,0,3,1);
+
+    QSpacerItem *vSpacer = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+    buttons->addItem(vSpacer, 0, 0, 1, 3);
+
+    buttons->setSizeConstraint(QLayout::SetFixedSize);
+
+    m_chooseMenu->addLayout(buttons);
+    visualisationLayout->addLayout(m_chooseMenu);
 
 
 
-        m_tabWidget = new QTabWidget(this);
-        m_tabWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding); // Растягиваем QTabWidget
-        m_visualisationTab = new QWidget();
-        m_fileTab = new QWidget();
-        m_fileTab->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
-        m_fileTab->setMinimumWidth(400);
-
-        QVBoxLayout *mainLayout = new QVBoxLayout(this);
-
-    // Размещение элементов в m_visualisationTab
-        QVBoxLayout* visualisationLayout = new QVBoxLayout(m_visualisationTab);
-
-        m_chooseMenu = new QVBoxLayout();
-        m_chooseMenu->addWidget(new QLabel("Algorithm:", this));
-        m_chooseMenu->addWidget(m_chooseAlgo);
-        m_chooseMenu->addWidget(new QLabel("Delay:", this));
-        m_chooseMenu->addWidget(m_chooseDelay);
-        m_chooseMenu->addWidget(new QLabel("Size:", this));
-        m_chooseMenu->addWidget(m_chooseSize);
-        m_chooseMenu->addWidget(new QLabel("Scramble:", this));
-        m_chooseMenu->addWidget(m_chooseScramble);
-        m_chooseMenu->addWidget(new QLabel("Compare By:", this));
-        m_chooseMenu->addWidget(m_chooseComparator);
-        m_chooseMenu->addWidget(new QLabel("Comparisons", this));
-        m_chooseMenu->addWidget(m_nbCmp);
-
-        auto buttons = new QGridLayout();
-        buttons->addWidget(m_start, 1, 1);
-        buttons->addWidget(m_exit, 2, 1);
-        buttons->addWidget(m_reset, 1, 2);
-
-        QSpacerItem *hSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-        buttons->addItem(hSpacer,1,0,3,1);
-
-        QSpacerItem *vSpacer = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
-        buttons->addItem(vSpacer, 0, 0, 1, 3);
-
-        buttons->setSizeConstraint(QLayout::SetFixedSize);
-
-        m_chooseMenu->addLayout(buttons);
-        visualisationLayout->addLayout(m_chooseMenu);
+    QScrollArea* scrollArea = new QScrollArea();
+    scrollArea->setWidgetResizable(true);
+    scrollArea->setWidget(m_fileTab);
+    scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
 
-    // File Tab
-        QScrollArea* scrollArea = new QScrollArea();
-        scrollArea->setWidgetResizable(true); // Разрешаем виджету внутри изменять размер
-        scrollArea->setWidget(m_fileTab);      // Устанавливаем виджет
-        scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff); // Отключаем горизонтальную прокрутку
+    QVBoxLayout* fileLayout = new QVBoxLayout(m_fileTab);
 
 
-        QVBoxLayout* fileLayout = new QVBoxLayout(m_fileTab);
+    studentGUI = new StudentGUI(m_fileTab);
+    fileLayout->addWidget(studentGUI);
+    fileLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
 
-
-        studentGUI = new StudentGUI(m_fileTab);
-        fileLayout->addWidget(studentGUI);
-        fileLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
-
-        m_fileTab->setLayout(fileLayout);
-        m_fileTab = scrollArea;
+    m_fileTab->setLayout(fileLayout);
+    m_fileTab = scrollArea;
 
 
 
 
-      // Добавляем mainLayout в основное окно
-        mainLayout->addWidget(m_tabWidget);
+  // Добавляем mainLayout в основное окно
+    mainLayout->addWidget(m_tabWidget);
 
 
-    // Добавляем вкладки в QTabWidget
-        m_tabWidget->addTab(m_visualisationTab, "Visualization");
-        m_tabWidget->addTab(m_fileTab, "File Sort");
+// Добавляем вкладки в QTabWidget
+    m_tabWidget->addTab(m_visualisationTab, "Visualization");
+    m_tabWidget->addTab(m_fileTab, "File Sort");
 
     setLayout(mainLayout);
 
@@ -160,6 +156,8 @@ Window::Window(QWidget *parent, QGraphicsScene *scene, QGraphicsView *view, cons
     int size = 8;
     generateData(size);
     visualizationWidget->setData(sequence);
+
+
 }
 
 void Window::startSorting() {
@@ -249,7 +247,7 @@ void Window::resizeSignalHandlerString(const QString& s){
         visualizationWidget->setData(sequence);
     }
     else {
-        m_chooseSize->setText("8"); //сбрасываем на 8, если введено некорректное значение
+        m_chooseSize->setText("8");
     }
 }
 
