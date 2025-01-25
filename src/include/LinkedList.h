@@ -38,6 +38,7 @@ private:
 
 
 public:
+
     LinkedList() : first{nullptr}, last{nullptr}, size{0} {}
 
     LinkedList(T *items, int size) : first{nullptr}, last{nullptr}, size{0} {

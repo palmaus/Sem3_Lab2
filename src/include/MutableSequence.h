@@ -7,14 +7,17 @@
 template<class T>
 class MutableSequence {
 public:
+    virtual ~MutableSequence() = default;
 
-    ~MutableSequence() = default;
+    virtual T &get(int index) = 0;
 
     virtual const T &get(int index) const = 0;
 
     virtual const T &getFirst() const = 0;
 
     virtual const T &getLast() const = 0;
+
+    virtual void set(int index, const T& item) = 0;
 
     virtual int getLength() const = 0;
 
@@ -32,7 +35,11 @@ public:
 
     virtual void insertAt(int index, const T &item) = 0;
 
+    virtual void concat(SharedPtr<MutableSequence<T>> sequence) = 0;
+
     virtual void removeAt(int index) = 0;
 
+    virtual SharedPtr<MutableSequence<T>> copy() = 0;
 
+    virtual void clear() = 0;
 };

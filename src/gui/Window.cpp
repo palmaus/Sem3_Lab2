@@ -4,12 +4,10 @@
 #include <fstream>
 #include <QScrollArea>
 
-Window::Window(QWidget *parent, QGraphicsScene *scene, QGraphicsView *view, const SharedPtr<MutableListSequence<Student>>& seq, int delay)
+Window::Window(QWidget *parent, QGraphicsScene *scene, QGraphicsView *view, const SharedPtr<MutableSequence<Student>>& seq, int delay)
     : QWidget(parent), sequence(seq),  delay(delay), m_parent(parent), m_scene(scene), m_view(view)
 {
-
     move(550, 10);
-
 
     m_chooseAlgo = new QComboBox(this);
     m_chooseAlgo->addItem("Bubblesort");
@@ -121,19 +119,14 @@ Window::Window(QWidget *parent, QGraphicsScene *scene, QGraphicsView *view, cons
     m_fileTab->setLayout(fileLayout);
     m_fileTab = scrollArea;
 
-
-
-
-  // Добавляем mainLayout в основное окно
+    // Добавляем mainLayout в основное окно
     mainLayout->addWidget(m_tabWidget);
 
-
-// Добавляем вкладки в QTabWidget
+    // Добавляем вкладки в QTabWidget
     m_tabWidget->addTab(m_visualisationTab, "Visualization");
     m_tabWidget->addTab(m_fileTab, "File Sort");
 
     setLayout(mainLayout);
-
 
     visualizationWidget = new VisualizationWidget(m_scene, this, delay);
     sortController = new SortController(this, delay);
@@ -150,14 +143,8 @@ Window::Window(QWidget *parent, QGraphicsScene *scene, QGraphicsView *view, cons
     connect(m_chooseScramble, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &Window::scrambleChangedHandler);
     connect(m_chooseComparator, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &Window::comparatorChangedHandler);
 
-
-
     setWindowTitle("A visualizer for sorting algorithms");
-    int size = 8;
-    generateData(size);
     visualizationWidget->setData(sequence);
-
-
 }
 
 void Window::startSorting() {
@@ -190,7 +177,6 @@ void Window::resetSorting() {
     int size = m_chooseSize->text().toInt(&ok);
     if (ok)
     {
-        generateData(size);
         scrambleData(m_chooseScramble->currentIndex());
         visualizationWidget->setData(sequence);
         sortController->resetSorting();
@@ -232,7 +218,6 @@ void Window::resizeSignalHandlerString(const QString& s){
     bool ok;
     int size = s.toInt(&ok);
     if (ok) {
-        generateData(size);
         scrambleData(m_chooseScramble->currentIndex());
 
         if (size == 512) {
@@ -257,14 +242,11 @@ void Window::scrambleChangedHandler(int index)
 {
     scrambleData(index);
     visualizationWidget->setData(sequence);
-
 }
-
 
 void Window::comparatorChangedHandler(int index) {
     currentComparator = comparators[index];
 }
-
 
 std::string Window::b62(long long unsigned int n) {
     std::string s;
@@ -286,9 +268,7 @@ void Window::scrambleData(int scramble)
         temp_array[i] = {sequence->get(i).getID(), -1, -1, 0, 0, 0};
 
     }
-
     Distributor distributor(size, temp_array);
-
     switch (scramble) {
         case 0:
             distributor.Srandom();
@@ -302,9 +282,7 @@ void Window::scrambleData(int scramble)
         case 3:
             distributor.Sshuffle();
             break;
-
         default:
-
             break;
     }
     sequence->clear();
@@ -315,15 +293,4 @@ void Window::scrambleData(int scramble)
     }
     delete[] temp_array;
 
-}
-
-void Window::generateData(int size)
-{
-    auto sequenceToSort = MakeShared<MutableListSequence<Student>>();
-    for(int i = 0; i < size; ++i)
-    {
-        int dob[3] = {1, 1, 2000};
-        sequenceToSort->append(Student("FirstName" + std::to_string(i), "LastName" + std::to_string(i), i, dob, 2023));
-    }
-    sequence = sequenceToSort;
 }

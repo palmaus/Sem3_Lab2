@@ -101,6 +101,11 @@ public:
     // Получение указателя
     T* get() const { return controlBlock ? controlBlock->ptr : nullptr; }
 
+    Deleter get_deleter() const {
+        return controlBlock->deleter;
+    }
+
+
     bool operator==(std::nullptr_t) const { return get() == nullptr; }
     bool operator!=(std::nullptr_t) const { return get() != nullptr; }
 

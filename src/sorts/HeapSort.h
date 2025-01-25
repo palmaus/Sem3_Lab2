@@ -8,80 +8,95 @@ template <typename T, typename Comparator>
 class HeapSort : public ISorter<T, Comparator> {
 private:
     int n;
-    int heapSize;
+    int heapSize = 0;
     int i = 0;
     bool finished = false;
-    const Comparator* comparator;
-     int m_cmpCounter = 0;
+    const Comparator* comparator = nullptr;
+    int m_cmpCounter = 0;
+    std::pair<int, int> lastChangedIndices = std::make_pair(-1, -1);
 
-    void heapify(SharedPtr<MutableListSequence<T>> sequence, int i) {
-       int largest = i;
-       int left = 2 * i + 1;
-       int right = 2 * i + 2;
+    void heapify(SharedPtr<MutableSequence<T>> sequence, int i) {
+        int largest = i;
+        int left = 2 * i + 1;
+        int right = 2 * i + 2;
 
-       ++m_cmpCounter;
+        ++m_cmpCounter;
         if (left < heapSize && (*comparator)(sequence->get(largest), sequence->get(left))) {
             largest = left;
         }
-       ++m_cmpCounter;
+        ++m_cmpCounter;
         if (right < heapSize && (*comparator)(sequence->get(largest), sequence->get(right))) {
             largest = right;
         }
 
-
         if (largest != i) {
+            lastChangedIndices = std::make_pair(i, largest);
             std::swap(sequence->get(i), sequence->get(largest));
             heapify(sequence, largest);
         }
     }
 
-    void buildHeap(SharedPtr<MutableListSequence<T>> sequence)
-    {
-      for (int i = n / 2 - 1; i >= 0; i--) {
-          heapify(sequence, i);
-      }
+    void buildHeap(SharedPtr<MutableSequence<T>> sequence) {
+        for (int i = n / 2 - 1; i >= 0; i--) {
+            heapify(sequence, i);
+        }
     }
 
 public:
-    int getComparisons() const override { return m_cmpCounter; }
-     std::pair<int, int> getChangedIndices() override {
-      return  i > 0 ? std::make_pair(0, i) : std::make_pair(-1, -1);
-     }
+    int getComparisons() const override {
+        return m_cmpCounter;
+    }
 
-    void Sort(SharedPtr<MutableListSequence<T>> sequence, const Comparator& comp) override {
-      n = sequence->getLength();
-      heapSize = n;
+    std::pair<int, int> getChangedIndices() override {
+        return lastChangedIndices;
+    }
+
+    void Sort(SharedPtr<MutableSequence<T>> sequence, const Comparator& comp) override {
+        n = sequence->getLength();
+        heapSize = n;
         finished = false;
         i = n - 1;
-       comparator = &comp;
+        comparator = &comp;
         this->sequence = sequence;
 
         if (n <= 1) {
             finished = true;
         }
+
+        buildHeap(sequence);
     }
-    bool isFinished() override { return finished; }
+
+    bool isFinished() override {
+        return finished;
+    }
 
     bool step() override {
         if (finished) return false;
 
-      if (i > 0)
-      {
+        // Сбрасываем индексы последних изменений
+        lastChangedIndices = std::make_pair(-1, -1);
 
-          buildHeap(sequence);
-          std::swap(sequence->get(0), sequence->get(i));
-           heapSize--;
-          i--;
+        if (i > 0) {
+            // Восстанавливаем кучу только для корня
+            heapify(sequence, 0);
 
-      } else{
+            // Перемещаем корень в конец кучи
+            lastChangedIndices = std::make_pair(0, i);
+            std::swap(sequence->get(0), sequence->get(i));
+
+            // Уменьшаем размер кучи и индекс
+            heapSize--;
+            i--;
+            return true;
+        } else {
             finished = true;
         }
 
-        return true;
+        return false;
     }
 
 private:
-     SharedPtr<MutableListSequence<T>> sequence;
+    SharedPtr<MutableSequence<T>> sequence;
 };
 
-#endif
+#endif // HEAPSORT_H

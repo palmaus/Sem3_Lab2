@@ -9,8 +9,6 @@ public:
     virtual bool operator()(const Student& s1, const Student& s2) const = 0;
 };
 
-
-
 class CompareStudentsByID : public StudentComparator {
 public:
 
@@ -26,7 +24,6 @@ public:
         return s1.getYearOfStudy() < s2.getYearOfStudy();
     }
 };
-
 
 class CompareStudentsByLastName : public StudentComparator {
 public:
@@ -51,9 +48,5 @@ public:
         return firstName1 < firstName2;
     }
 };
-
-
-
-
 
 #endif //COMPARATORS_H

@@ -5,6 +5,7 @@
 
 #include "Window.h"
 #include "MutableListSequence.h"
+#include "MutableArraySequence.h"
 #include <functional>
 #include <Student.h>
 
@@ -20,11 +21,11 @@
 std::random_device rd;
 std::mt19937 gen(rd());
 
-SharedPtr<MutableListSequence<Student>> generateStudents(int count) {
+SharedPtr<MutableSequence<Student>> generateStudents(int count) {
     std::vector<std::string> firstNames = {"John", "Jane", "Peter", "Mary", "David", "Sarah", "Michael", "Jessica", "Christopher", "Ashley"};
     std::vector<std::string> lastNames = {"Doe", "Smith", "Jones", "Brown", "Wilson", "Davis", "Garcia", "Rodriguez", "Williams", "Johnson"};
 
-    auto sequence = MakeShared<MutableListSequence<Student>>();
+    auto sequence = SharedPtr<MutableSequence<Student>>(new MutableArraySequence<Student>());
     std::uniform_int_distribution<> nameDist(0, firstNames.size() - 1);
     std::uniform_int_distribution<> dayDist(1, 28);
     std::uniform_int_distribution<> monthDist(1, 12);
@@ -61,8 +62,21 @@ void runAllTests() {
     runner.runTestGroup("LinkedList Tests", {
         internal_tests::testLinkedList
     });
+
+    runner.runTestGroup("DynamicArray Tests", {
+        internal_tests::testDynamicArray
+    });
+
     runner.runTestGroup("MutableListSequence Tests", {
         internal_tests::testMutableListSequence
+    });
+
+    runner.runTestGroup("Sorting Algorithms Tests", {
+         internal_tests::testSortingAlgorithms
+    });
+
+    runner.runTestGroup("MutableArraySequence Tests", {
+        internal_tests::testMutableArraySequence
     });
 
     runner.printResults();
@@ -75,45 +89,29 @@ void benchmark(int startIterations, int endIterations, int step) {
    for (int iterations = startIterations; iterations <= endIterations; iterations += step) {
         auto sequence = generateStudents(iterations);
         benchmarkRunner.registerBenchmark("BubbleSort," + std::to_string(iterations) , [&, sequence, comp](){
-             auto copy = MakeShared<MutableListSequence<Student>>();
-             for(int i = 0; i < sequence->getLength(); ++i) {
-                 copy->append(sequence->get(i));
-             }
              BubbleSort<Student, StudentComparator> sorter;
-             sorter.Sort(copy, comp);
+             sorter.Sort(sequence, comp);
              while(!sorter.isFinished()) {
                  sorter.step();
              }
         });
         benchmarkRunner.registerBenchmark("HeapSort," + std::to_string(iterations), [&, sequence, comp](){
-            auto copy = MakeShared<MutableListSequence<Student>>();
-            for(int i = 0; i < sequence->getLength(); ++i) {
-                copy->append(sequence->get(i));
-            }
             HeapSort<Student, StudentComparator> sorter;
-            sorter.Sort(copy, comp);
+            sorter.Sort(sequence, comp);
             while(!sorter.isFinished()) {
                 sorter.step();
             }
         });
         benchmarkRunner.registerBenchmark("MergeSort," + std::to_string(iterations), [&, sequence, comp](){
-            auto copy = MakeShared<MutableListSequence<Student>>();
-            for(int i = 0; i < sequence->getLength(); ++i) {
-                copy->append(sequence->get(i));
-            }
             MergeSort<Student, StudentComparator> sorter;
-            sorter.Sort(copy, comp);
+            sorter.Sort(sequence, comp);
             while(!sorter.isFinished()) {
                 sorter.step();
             }
         });
         benchmarkRunner.registerBenchmark("ShellSort," + std::to_string(iterations), [&, sequence, comp](){
-            auto copy = MakeShared<MutableListSequence<Student>>();
-            for(int i = 0; i < sequence->getLength(); ++i) {
-                copy->append(sequence->get(i));
-            }
             ShellSort<Student, StudentComparator> sorter;
-            sorter.Sort(copy, comp);
+            sorter.Sort(sequence, comp);
             while(!sorter.isFinished()) {
                 sorter.step();
             }
@@ -137,10 +135,10 @@ void benchmark(int startIterations, int endIterations, int step) {
 
 
 int main(int argc, char *argv[]) {
-    bool runTests = true;
+    bool runTests = false;
     if (runTests) {
         runAllTests();
-        benchmark(1000, 100000, 10000);
+        // benchmark(2000, 10000, 2000);
     } else {
         QApplication a(argc, argv);
 
@@ -156,19 +154,12 @@ int main(int argc, char *argv[]) {
         QHBoxLayout mainLayout(&centralWidget);
 
 
-        auto sequenceToSort = MakeShared<MutableListSequence<Student>>();
-        for (int i = 0; i < 8; i++)
-        {
-            int dob[3] = {1, 1, 2000};
-            sequenceToSort->append(Student("FirstName" + std::to_string(i), "LastName" + std::to_string(i), i, dob, 2023));
-
-        }
+        auto sequenceToSort = generateStudents(10);
 
         auto mainWindowPtr = std::make_unique<Window>(&centralWidget, &scene, &view, sequenceToSort, 10);
 
         mainLayout.addWidget(&view);
         mainLayout.addWidget(mainWindowPtr.get());
-
 
         mainWindow.setCentralWidget(&centralWidget);
         mainWindow.showMaximized();

@@ -10,7 +10,7 @@
 template <typename T, typename Comparator>
 class ISorter {
 public:
-    virtual void Sort(SharedPtr<MutableListSequence<T>> sequence, const Comparator& comp) = 0;
+    virtual void Sort(SharedPtr<MutableSequence<T>> sequence, const Comparator& comp) = 0;
 
     virtual std::pair<int, int> getChangedIndices() = 0;
 

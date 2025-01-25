@@ -11,7 +11,7 @@ void SortController::setDelay(int delay)
     timer->setInterval(delay);
 }
 
-void SortController::setSequence(SharedPtr<MutableListSequence<Student>> seq) {
+void SortController::setSequence(SharedPtr<MutableSequence<Student>> seq) {
     sequence = seq;
 }
 
@@ -28,8 +28,6 @@ void SortController::setCurrentSorter(ISorter<Student, StudentComparator>* sorte
   currentSorter = sorter;
 }
 
-
-
 void SortController::startSorting() {
     if (sequence && currentSorter && comparator) {
         currentSorter->Sort(sequence, *comparator);
@@ -37,7 +35,6 @@ void SortController::startSorting() {
         timer->start(delay);
     }
 }
-
 
 void SortController::resetSorting() {
   if (currentSorter)

@@ -3,7 +3,7 @@
 #include <QTimer>
 
 
-void VisualizationWidget::setData(SharedPtr<MutableListSequence<Student>> seq)
+void VisualizationWidget::setData(SharedPtr<MutableSequence<Student>> seq)
 {
     clearScene();
     sequence = seq;
@@ -85,6 +85,9 @@ void VisualizationWidget::updateVisualization(int index1, int index2) {
         int up2 = 540 - height2;
         QPointF pos2 = QPointF(left2, up2);
 
+        std::cout << "index1: " << index1 << " index2: " << index2 << std::endl;
+        std::cout << "pos1: " << pos1.x() << " " << pos1.y() << std::endl;
+        std::cout << "pos2: " << pos2.x() << " " << pos2.y() << std::endl;
 
         // Анимируем перемещение
         QPropertyAnimation* animation1 = animations[index1 * 2];

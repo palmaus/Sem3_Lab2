@@ -16,11 +16,12 @@
 
 #include <iostream>
 #include <functional>
+#include <MutableArraySequence.h>
 
 #include "Student.h"
 #include "ISorter.h"
 #include "BubbleSort.h"
-#include "MutableListSequence.h"
+#include "MutableSequence.h"
 #include "SharedPtr.h"
 #include "Comparators.h"
 #include "File.h"
@@ -40,18 +41,20 @@ private:
 
     QComboBox* sorterComboBox;
     QComboBox* comparatorComboBox;
+    QComboBox* sequenceComboBox;
 
     QPushButton* sortButton;
     QListWidget* sortedStudentListWidget;
 
-    SharedPtr<MutableListSequence<Student>> studentSequence;
+    SharedPtr<MutableSequence<Student>> studentSequence;
+    SharedPtr<MutableSequence<Student>> sortedStudentSequence;
 
 
     void displayErrorMessage(const QString& message) {
         QMessageBox::critical(this, "Error", message);
     }
 
-    void displayStudentData(const Student& student, QListWidget* listWidget) {
+    static void displayStudentData(const Student& student, QListWidget* listWidget) {
         std::string firstName = student.getFirstName();
         std::string lastName = student.getLastName();
 
@@ -67,8 +70,7 @@ private:
     }
 
 public:
-    StudentGUI(QWidget* parent = nullptr) : QWidget(parent), studentSequence(MakeShared<MutableListSequence<Student>>()) {
-
+    explicit StudentGUI(QWidget* parent = nullptr) : QWidget(parent), studentSequence(new MutableArraySequence<Student>()) {
         firstNameEdit = new QLineEdit();
         lastNameEdit = new QLineEdit();
         idEdit = new QLineEdit();
@@ -92,22 +94,33 @@ public:
         comparatorComboBox->addItem("By Last Name");
         comparatorComboBox->addItem("By First Name");
 
+        sequenceComboBox = new QComboBox();
+        sequenceComboBox->addItem("Array Sequence");
+        sequenceComboBox->addItem("List Sequence");
+
+        int initialSequenceType = sequenceComboBox->currentIndex();
+
+        if (initialSequenceType == 0) {
+            studentSequence = SharedPtr<MutableSequence<Student>>(new MutableArraySequence<Student>());
+        } else {
+            studentSequence = SharedPtr<MutableSequence<Student>>(new MutableListSequence<Student>());
+        }
 
         sortButton = new QPushButton("Sort");
         sortedStudentListWidget = new QListWidget();
 
-        QVBoxLayout* mainLayout = new QVBoxLayout();
+        auto* mainLayout = new QVBoxLayout();
 
-        QPushButton* loadButton = new QPushButton("Load From File");
-        QPushButton* saveButton = new QPushButton("Save To File");
+        auto* loadButton = new QPushButton("Load From File");
+        auto* saveButton = new QPushButton("Save To File");
 
-        QHBoxLayout* fileOperationsLayout = new QHBoxLayout();
+        auto* fileOperationsLayout = new QHBoxLayout();
         fileOperationsLayout->addWidget(loadButton);
         fileOperationsLayout->addWidget(saveButton);
 
         mainLayout->addLayout(fileOperationsLayout);
 
-        QGridLayout *inputLayout = new QGridLayout;
+        auto *inputLayout = new QGridLayout;
         inputLayout->addWidget(new QLabel("First Name:"), 0, 0);
         inputLayout->addWidget(firstNameEdit, 0, 1);
         inputLayout->addWidget(new QLabel("Last Name:"), 1, 0);
@@ -116,7 +129,7 @@ public:
         inputLayout->addWidget(idEdit, 2, 1);
         inputLayout->addWidget(new QLabel("Date of Birth:"), 3, 0);
 
-        QHBoxLayout* dobLayout = new QHBoxLayout();
+        auto* dobLayout = new QHBoxLayout();
         dobLayout->addWidget(dobDaySpinBox);
         dobLayout->addWidget(dobMonthSpinBox);
         dobLayout->addWidget(dobYearSpinBox);
@@ -130,11 +143,13 @@ public:
         mainLayout->addLayout(inputLayout);
         mainLayout->addWidget(studentListWidget);
 
-        QHBoxLayout* sortingLayout = new QHBoxLayout();
+        auto* sortingLayout = new QHBoxLayout();
         sortingLayout->addWidget(new QLabel("Sorter:"));
         sortingLayout->addWidget(sorterComboBox);
         sortingLayout->addWidget(new QLabel("Comparator:"));
         sortingLayout->addWidget(comparatorComboBox);
+        sortingLayout->addWidget(new QLabel("Sequence:"));
+        sortingLayout->addWidget(sequenceComboBox);
         mainLayout->addLayout(sortingLayout);
 
         mainLayout->addWidget(sortButton);
@@ -144,12 +159,32 @@ public:
 
         connect(addStudentButton, &QPushButton::clicked, this, &StudentGUI::addStudent);
         connect(sortButton, &QPushButton::clicked, this, &StudentGUI::sortStudents);
+        connect(sequenceComboBox, &QComboBox::currentIndexChanged, this, &StudentGUI::changeSequenceType);
         connect(loadButton, &QPushButton::clicked, this, &StudentGUI::loadFromFile);
         connect(saveButton, &QPushButton::clicked, this, &StudentGUI::saveToFile);
     }
 
 
 private slots:
+
+    void changeSequenceType(int index) {
+        SharedPtr<MutableSequence<Student>> newSequence;
+
+        if (index == 0) {
+            newSequence = SharedPtr<MutableSequence<Student>>(new MutableArraySequence<Student>());
+        } else {
+            newSequence = SharedPtr<MutableSequence<Student>>(new MutableListSequence<Student>());
+        }
+
+
+        if (studentSequence) {
+            for (int i = 0; i < studentSequence->getLength(); ++i) {
+                newSequence->append(studentSequence->get(i));
+            }
+        }
+        studentSequence = newSequence;
+        updateStudentListWidget();
+    }
 
     void addStudent() {
         QString firstName = firstNameEdit->text();
@@ -192,41 +227,30 @@ private slots:
             case 1: sorter = new ShellSort<Student, StudentComparator>(); break;
             case 2: sorter = new MergeSort<Student, StudentComparator>(); break;
             case 3: sorter = new HeapSort<Student, StudentComparator>(); break;
+            default: break;
         }
-
-
-
         StudentComparator* comparator = nullptr;
         switch (comparatorComboBox->currentIndex()) {
                 case 0: comparator = new CompareStudentsByID(); break;
                 case 1: comparator = new CompareStudentsByYear(); break;
                 case 2: comparator = new CompareStudentsByLastName(); break;
                 case 3: comparator = new CompareStudentsByFirstName(); break;
+                default:  break;
         }
-
-
-
-
         if (sorter && comparator && studentSequence && studentSequence->getLength() > 0) {
-            SharedPtr<MutableListSequence<Student>> sortedSequence = MakeShared<MutableListSequence<Student>>();
-            for(int i = 0; i < studentSequence->getLength(); ++i)
-            {
-                sortedSequence->append(studentSequence->get(i));
-            }
-
+            auto sortedSequence = studentSequence->copy();
             sorter->Sort(sortedSequence, *comparator);
             while (!sorter->isFinished())
             {
                 sorter->step();
             }
-
             sortedStudentListWidget->clear();
             for (int i = 0; i < sortedSequence->getLength(); ++i) {
                 displayStudentData(sortedSequence->get(i), sortedStudentListWidget);
             }
+            sortedStudentSequence = sortedSequence->copy();
         } else {
             sortedStudentListWidget->clear();
-
             if (!sorter) {
                 displayErrorMessage("Sorting method not selected.");
             } else if (!comparator) {
@@ -249,21 +273,28 @@ private slots:
     }
 
     void loadFromFile() {
-        QString fileName = QFileDialog::getOpenFileName(this, "Open File", "", "Text Files (*.txt)");
-        std::cout<<fileName.toStdString() << " 1 " << std::endl;
-        if (fileName.isEmpty()) {
-            displayErrorMessage("File not selected.");
-            fileName = "/home/radioactive/CLionProjects/Sem3-Lab2/unsorted_data.txt";
-        }
+        QFileDialog::Options options = QFileDialog::DontUseNativeDialog;
+        QString filePath = QFileDialog::getOpenFileName(
+            nullptr,
+            "Select a file to load",
+            QDir::homePath(),
+            "Text Files (*.txt)",
+            nullptr,
+            options
+        );
 
-        try {
-            SharedPtr<MutableListSequence<Student>> loadedStudents = ReadStudentsFromFile(fileName.toStdString());
-            studentSequence = loadedStudents; // Replace existing sequence
-            updateStudentListWidget();
-        } catch (const std::exception& e) {
-            displayErrorMessage(e.what());
+        if (!filePath.isEmpty()) {
+            try {
+                studentSequence = ReadStudentsFromFile(filePath.toStdString());
+                updateStudentListWidget();
+            } catch (const std::exception& e) {
+                displayErrorMessage(e.what());
+            }
         }
     }
+
+
+
     void updateStudentListWidget() {
           studentListWidget->clear();
           for (int i = 0; i < studentSequence->getLength(); ++i) {
@@ -277,18 +308,27 @@ private slots:
             return;
         }
 
-        QString fileName = QFileDialog::getSaveFileName(this, "Save File", "", "Text Files (*.txt)");
+        QFileDialog::Options options = QFileDialog::DontUseNativeDialog;
+        QString fileName = QFileDialog::getSaveFileName(
+            this,
+            "Save File",
+            QDir::homePath(),
+            "Text Files (*.txt)",
+            nullptr,
+            options
+        );
+
         if (fileName.isEmpty()) {
-            displayErrorMessage("File not selected for saving.");
-            fileName = "/home/radioactive/CLionProjects/Sem3-Lab2/output.txt";
+            return;
         }
 
         try {
-            WriteStudentsToFile(studentSequence, fileName.toStdString());
+            WriteStudentsToFile(sortedStudentSequence, fileName.toStdString());
         } catch (const std::exception& e) {
-            displayErrorMessage(e.what());
+            displayErrorMessage(QString("Failed to save file: ") + e.what());
         }
     }
+
 
 };
 

@@ -10,6 +10,8 @@ void BenchmarkRunner::runBenchmarks(int iterations) {
         const std::string& name = pair.first;
         BenchmarkFunction func = pair.second;
 
+        std::cout << "Running benchmark: " << name << std::endl;
+
         auto start = std::chrono::high_resolution_clock::now();
         for (int i = 0; i < iterations; ++i) {
             func();

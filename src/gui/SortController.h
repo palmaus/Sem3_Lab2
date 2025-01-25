@@ -14,9 +14,8 @@ class SortController : public QObject {
     Q_OBJECT
 public:
     explicit SortController(QObject *parent = nullptr, int delay = 500);
-
     void setDelay(int delay);
-    void setSequence(SharedPtr<MutableListSequence<Student>> seq);
+    void setSequence(SharedPtr<MutableSequence<Student>> seq);
     void setComparator(const StudentComparator& comp);
     void setCurrentSorter(ISorter<Student, StudentComparator>* sorter);
     int  getComparisons() const;
@@ -27,14 +26,14 @@ public:
         void sortFinished();
 
     public:
-        void startSorting(); // Изменено, удален параметр sorter
+        void startSorting();
         void resetSorting();
 
     private:
         void performSortStep();
 
 private:
-    SharedPtr<MutableListSequence<Student>> sequence;
+    SharedPtr<MutableSequence<Student>> sequence;
     const StudentComparator* comparator = nullptr;
     ISorter<Student, StudentComparator>* currentSorter = nullptr;
     QTimer *timer;

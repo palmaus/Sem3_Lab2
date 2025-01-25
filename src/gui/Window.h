@@ -41,8 +41,7 @@ class Window : public QWidget {
     Q_OBJECT
 
     public:
-        Window(QWidget *parent, QGraphicsScene *scene, QGraphicsView *view, const SharedPtr<MutableListSequence<Student>>& seq, int delay = 500);
-
+        Window(QWidget *parent, QGraphicsScene *scene, QGraphicsView *view, const SharedPtr<MutableSequence<Student>>& seq, int delay = 500);
 
     signals:
         void runSignal();
@@ -77,7 +76,7 @@ class Window : public QWidget {
 
 
     private:
-        SharedPtr<MutableListSequence<Student>> sequence;
+        SharedPtr<MutableSequence<Student>> sequence;
         StudentComparator* currentComparator;
         QWidget *m_parent;
         QGraphicsScene *m_scene;
@@ -98,9 +97,9 @@ class Window : public QWidget {
         std::vector<StudentComparator*> comparators; // Вектор для хранения компараторов
 
 
-         QTabWidget *m_tabWidget;
-         QWidget *m_visualisationTab;
-         QWidget *m_fileTab;
+        QTabWidget *m_tabWidget;
+        QWidget *m_visualisationTab;
+        QWidget *m_fileTab;
 
 
         VisualizationWidget *visualizationWidget;
@@ -111,7 +110,6 @@ class Window : public QWidget {
         std::string b62(long long unsigned int n);
 
         void scrambleData(int scramble);
-        void generateData(int size);
         StudentGUI* studentGUI;
 
 

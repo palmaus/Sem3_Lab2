@@ -1,7 +1,7 @@
 #ifndef FILE_H
 #define FILE_H
 
-#include "MutableListSequence.h"
+#include "MutableSequence.h"
 #include "Student.h"
 #include "SharedPtr.h"
 
@@ -10,13 +10,13 @@
 #include <sstream>
 #include <stdexcept>
 
-inline SharedPtr<MutableListSequence<Student>> ReadStudentsFromFile(const std::string& filename) {
+inline SharedPtr<MutableSequence<Student>> ReadStudentsFromFile(const std::string& filename) {
     std::ifstream inputFile(filename);
     if (!inputFile.is_open()) {
         throw std::runtime_error("Could not open file: " + filename);
     }
 
-    SharedPtr<MutableListSequence<Student>> students = MakeShared<MutableListSequence<Student>>();
+    auto students = SharedPtr<MutableSequence<Student>>(new MutableArraySequence<Student>());
     std::string line;
 
     while (std::getline(inputFile, line)) {
@@ -38,20 +38,17 @@ inline SharedPtr<MutableListSequence<Student>> ReadStudentsFromFile(const std::s
     }
 
     inputFile.close();
-    return students;
+    return SharedPtr<MutableSequence<Student>>(students);
 }
 
-template<typename T>
-void WriteStudentsToFile(const SharedPtr<MutableListSequence<T>>& students, const std::string& filename) {
+inline void WriteStudentsToFile(const SharedPtr<MutableSequence<Student>>& students, const std::string& filename) {
     std::ofstream outputFile(filename);
     if (!outputFile.is_open()) {
         throw std::runtime_error("Could not open file");
     }
-
     for (int i = 0; i < students->getLength(); ++i) {
         outputFile << students->get(i) << std::endl;
     }
-
     outputFile.close();
 }
 

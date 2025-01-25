@@ -61,7 +61,7 @@ public:
         return SharedPtr<MutableSequence<T>>(new MutableListSequence<T>(*subList));
     }
 
-    void concat(SharedPtr<MutableListSequence<T>> sequence) {
+    void concat(SharedPtr<MutableSequence<T>> sequence) {
         for (int i = 0; i < sequence->getLength(); i++) {
             append(sequence->get(i));
         }
@@ -71,6 +71,10 @@ public:
     {
         removeAt(index);
         insertAt(index, item);
+    }
+
+    SharedPtr<MutableSequence<T>> copy() {
+        return SharedPtr<MutableSequence<T>>(new MutableListSequence<T>(LinkedList<T>(base)));
     }
 
     Option<T> tryGetFirst() const override {

@@ -21,10 +21,8 @@
 class VisualizationWidget : public QWidget {
 public:
     explicit VisualizationWidget(QGraphicsScene* scene, QWidget* parent = nullptr, int delay = 500) : QWidget(parent), m_scene(scene), delay(delay) {}
-
-
     public slots:
-    void setData(SharedPtr<MutableListSequence<Student>> seq);
+    void setData(SharedPtr<MutableSequence<Student>> seq);
     void updateVisualization(int index1, int index2);
 
 private:
@@ -32,17 +30,11 @@ private:
     void createRect(int i);
     void clearScene();
 
-private:
-
     QGraphicsScene* m_scene;
-    SharedPtr<MutableListSequence<Student>> sequence;
+    SharedPtr<MutableSequence<Student>> sequence;
     double m_width;
     std::vector<QGraphicsProxyWidget*> proxyWidgets;
     std::vector<QWidget*> itemWidgets;
-
     std::vector<QPropertyAnimation *> animations;
     int delay;
-
-
-
 };

@@ -6,20 +6,21 @@
 #include <utility>
 
 template <typename T, typename Comparator>
-class BubbleSort: public ISorter<T, Comparator> {
+class BubbleSort : public ISorter<T, Comparator> {
 private:
     int i = 0;
     int j = 0;
     int n = 0;
     bool finished = false;
-    const Comparator* comparator;
+    const Comparator* comparator = nullptr;
     int m_cmpCounter = 0;
 
 public:
+    int getComparisons() const override {
+        return m_cmpCounter;
+    }
 
-    int getComparisons() const override { return m_cmpCounter; }
-
-    void Sort(SharedPtr<MutableListSequence<T>> sequence, const Comparator& comp) override {
+    void Sort(SharedPtr<MutableSequence<T>> sequence, const Comparator& comp) override {
         n = sequence->getLength();
         finished = false;
         i = 0;
@@ -30,25 +31,24 @@ public:
         }
         comparator = &comp;
         this->sequence = sequence; // Копируем sequence
-
-
     }
 
-    std::pair<int, int> getChangedIndices() override { return (j < n - 1 ) ? std::make_pair(j, j+1) : std::make_pair(-1, -1); }
+    std::pair<int, int> getChangedIndices() override {
+        return (j < n - 1) ? std::make_pair(j, j + 1) : std::make_pair(-1, -1);
+    }
 
-
-    bool isFinished() override { return finished; }
+    bool isFinished() override {
+        return finished;
+    }
 
     bool step() override {
         if (finished) return false;
 
-        if (i < n - 1)
-        {
-            if (j < n - i - 1)
-            {
+        if (i < n - 1) {
+            if (j < n - i - 1) {
                 ++m_cmpCounter;
-                if ((*comparator)(this->sequence->get(j+1), this->sequence->get(j))) {
-                    std::swap(this->sequence->get(j), this->sequence->get(j+1));
+                if ((*comparator)(this->sequence->get(j + 1), this->sequence->get(j))) {
+                    std::swap(this->sequence->get(j), this->sequence->get(j + 1));
                     return true;
                 }
                 j++;
@@ -57,18 +57,14 @@ public:
                 j = 0;
             }
 
-        }
-        else
-        {
+        } else {
             finished = true;
         }
         return false;
     }
 
 private:
-    SharedPtr<MutableListSequence<T>> sequence;
-
-
+    SharedPtr<MutableSequence<T>> sequence;
 };
 
-#endif
+#endif // BUBBLESORT_H
