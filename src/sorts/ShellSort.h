@@ -65,19 +65,14 @@ public:
 
     bool step() override {
         if (finished) return false;
+
         if (gapIndex < gaps.size()) {
             if (i < n) {
                 if (j < n) {
                     ++m_cmpCounter;
                     if (j >= gaps[gapIndex] && (*comparator)(sequence->get(j), sequence->get(j - gaps[gapIndex]))) {
                         std::swap(sequence->get(j), sequence->get(j - gaps[gapIndex]));
-                        int tempJ = j;
                         j -= gaps[gapIndex];
-                        while (j >= gaps[gapIndex] && (*comparator)(sequence->get(j - gaps[gapIndex]), sequence->get(j))) {
-                            ++m_cmpCounter;
-                            std::swap(sequence->get(j), sequence->get(j - gaps[gapIndex]));
-                            j -= gaps[gapIndex];
-                        }
                         return true;
                     } else {
                         j++;
@@ -87,13 +82,34 @@ public:
                     j = i;
                 }
             } else {
-                gapIndex++;
                 i = 0;
                 j = 0;
+                gapIndex++;
+                if (gapIndex >= gaps.size()) {
+                    if (!finished) {
+                        gapIndex = gaps.size() - 1;
+                        finished = true;
+                    }
+
+                }
             }
-        } else {
-            finished = true;
         }
+
+        if (finished && gaps.back() == 1 && i < n - 1) {
+            if (j < n - i - 1) {
+                if ((*comparator)(sequence->get(j + 1), sequence->get(j))) {
+                    std::swap(sequence->get(j), sequence->get(j + 1));
+                    return true;
+                }
+                j++;
+            } else {
+                i++;
+                j = 0;
+            }
+            return false;
+        }
+
+
         return false;
     }
 
